@@ -1,6 +1,7 @@
 import { env } from './env'
 import { getClient } from './adapter'
-import { sync } from './sync'
+import { getChatId, sync, syncMessage } from './sync'
+import { proxy } from './proxy'
 
 async function main() {
   let adapter = getClient({
@@ -26,6 +27,13 @@ async function main() {
   await adapter.ready
   console.log('[app] client identity:', adapter.getTel() || 'unknown')
   console.log('[app] auth state:', adapter.getAuthState())
+
+  adapter.client.on('message', message => {
+    let chat_id = getChatId(message)
+    let chat = proxy.chat[chat_id]
+    console.log('[app] new message from', chat.name, ':', message.body)
+    syncMessage(message, chat_id)
+  })
 
   console.log('[app] syncing messages...')
   await sync(adapter.client)

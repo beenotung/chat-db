@@ -1,11 +1,12 @@
 import { Client, Chat as WChat, Message as WMessage } from 'whatsapp-web.js'
-import { find, seedRow } from 'better-sqlite3-proxy'
+import { count, find, seedRow } from 'better-sqlite3-proxy'
 import { Chat, proxy } from './proxy'
 import { db } from './db'
 import { formatProgress } from './format'
 import { mkdirSync, writeFileSync } from 'fs'
 import { GroupMetadata, MessageData } from './types'
 import { ProgressCli } from '@beenotung/tslib/progress-cli'
+import { sleep } from '@beenotung/tslib/async/wait'
 
 mkdirSync('res', { recursive: true })
 
@@ -27,8 +28,31 @@ export async function sync(client: Client) {
   chat_index = 0
   for (let { chat, chat_row } of pairs) {
     chat_index++
+    let chat_id = chat_row.id!
+    cli.update(`[sync] loading chat ${chat_index}/${chats.length} messages... `)
+    cli.update(
+      `[sync] loading chat ${chat_index}/${chats.length} messages... [open chat window]`,
+    )
+    await retry(() => client.interface.openChatWindow(chat.id._serialized))
+    // await client.interface.openChatWindow(chat.id._serialized)
+    await sleep(2000)
+    cli.update(
+      `[sync] loading chat ${chat_index}/${chats.length} messages... [sync history]`,
+    )
     await client.syncHistory(chat.id._serialized)
-    let messages = await chat.fetchMessages({ limit: Infinity })
+    await sleep(1000)
+    cli.update(
+      `[sync] loading chat ${chat_index}/${chats.length} messages... [fetch messages]`,
+    )
+    let messages = await fetchMessages({
+      chat,
+      initial_limit: count(proxy.message, { chat_id }),
+      onProgress: count => {
+        cli.update(
+          `[sync] loading chat ${chat_index}/${chats.length} messages... [fetch messages] (${count} messages loaded)`,
+        )
+      },
+    })
     writeFileSync(
       `res/messages_${chat.id._serialized}.json`,
       JSON.stringify(messages, null, 2),
@@ -40,7 +64,7 @@ export async function sync(client: Client) {
         `[sync] saving chat ${chat_index}/${chats.length} messages... ` +
           formatProgress(message_index, messages.length),
       )
-      syncMessage(chat_row, message)
+      syncMessage(message, chat_id)
     }
     if (messages.length === 0) {
       cli.update(
@@ -51,6 +75,48 @@ export async function sync(client: Client) {
   cli.nextLine()
 }
 
+async function retry(fn: () => Promise<void>) {
+  for (;;) {
+    try {
+      await fn()
+      break
+    } catch (error) {
+      let message = String(error)
+      if (message.includes('Promise was collected')) {
+        await sleep(1000)
+        continue
+      }
+      throw error
+    }
+  }
+}
+
+async function fetchMessages(args: {
+  chat: WChat
+  onProgress: (count: number) => void
+  initial_limit: number
+}) {
+  let limit = args.initial_limit || 100
+  let prev_count = 0
+  let interval = 500
+  while (true) {
+    await sleep(interval)
+    let messages = await args.chat.fetchMessages({ limit })
+    args.onProgress(messages.length)
+    if (messages.length != prev_count) {
+      prev_count = messages.length
+      limit *= 2
+      interval = 500
+      continue
+    }
+    if (interval < 1500) {
+      interval += 500
+      continue
+    }
+    return messages
+  }
+}
+
 function getUserId(args: { server: string; user: string }): number {
   return seedRow(proxy.user, {
     server: args.server,
@@ -58,7 +124,7 @@ function getUserId(args: { server: string; user: string }): number {
   })
 }
 
-let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
+export let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
   let user_id = getUserId(chat.id)
   let chat_row = find(proxy.chat, { user_id })
   let updates: Omit<Chat, 'id' | 'user_id' | 'last_message_id'> = {
@@ -122,16 +188,25 @@ let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
 }
 syncChat = db.transaction(syncChat)
 
-let syncMessage = (
-  chat_row: Chat,
+export function getChatId(message: WMessage): number {
+  let [user, server] = message.id.remote.split('@')
+  let row = find(proxy.user, { server, user })
+  if (!row) {
+    throw new Error(`user ${message.id.remote} not found`)
+  }
+  return row.id!
+}
+
+export let syncMessage = (
   message: WMessage & { _data?: MessageData },
+  chat_id = getChatId(message),
 ) => {
   let data = message._data!
   let message_id = seedRow(
     proxy.message,
     { api_id: message.id.id },
     {
-      chat_id: chat_row.id!,
+      chat_id,
       ack: message.ack,
       has_media: message.hasMedia,
       body: message.body,
