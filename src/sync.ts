@@ -117,6 +117,14 @@ async function fetchMessages(args: {
   }
 }
 
+function parseUser(remote: string) {
+  let [user, server] = remote
+    .split('_')
+    .find(part => part.includes('@'))!
+    .split('@')
+  return { server, user }
+}
+
 function getUserId(args: { server: string; user: string }): number {
   return seedRow(proxy.user, {
     server: args.server,
@@ -190,11 +198,15 @@ syncChat = db.transaction(syncChat)
 
 export function getChatId(message: WMessage): number {
   let [user, server] = message.id.remote.split('@')
-  let row = find(proxy.user, { server, user })
-  if (!row) {
+  let user_row = find(proxy.user, { server, user })
+  if (!user_row) {
     throw new Error(`user ${message.id.remote} not found`)
   }
-  return row.id!
+  let chat_row = find(proxy.chat, { user_id: user_row.id! })
+  if (!chat_row) {
+    throw new Error(`chat for user ${message.id.remote} not found`)
+  }
+  return chat_row.id!
 }
 
 export let syncMessage = (
@@ -212,8 +224,8 @@ export let syncMessage = (
       body: message.body,
       type: message.type,
       timestamp: message.timestamp,
-      from_user_id: getUserId(data.from),
-      to_user_id: getUserId(data.to),
+      from_user_id: getUserId(parseUser(message.from)),
+      to_user_id: getUserId(parseUser(message.to)),
       author_user_id: data.author ? getUserId(data.author) : null,
       device_type: message.deviceType,
       is_forwarded: message.isForwarded,

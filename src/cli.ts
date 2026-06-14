@@ -2,6 +2,7 @@ import { env } from './env'
 import { getClient } from './adapter'
 import { getChatId, sync, syncMessage } from './sync'
 import { proxy } from './proxy'
+import { writeFileSync } from 'fs'
 
 async function main() {
   let adapter = getClient({
@@ -29,10 +30,24 @@ async function main() {
   console.log('[app] auth state:', adapter.getAuthState())
 
   adapter.client.on('message', message => {
-    let chat_id = getChatId(message)
-    let chat = proxy.chat[chat_id]
-    console.log('[app] new message from', chat.name, ':', message.body)
-    syncMessage(message, chat_id)
+    try {
+      // writeFileSync(
+      //   `res/new-message-${message.id.id}.json`,
+      //   JSON.stringify(message, null, 2),
+      // )
+      let chat_id = getChatId(message)
+      // let chat = proxy.chat[chat_id]
+      // console.log('[app] new message:', {
+      //   id: message.id.id,
+      //   remote: message.id.remote,
+      //   chat: { id: chat_id, name: chat.name },
+      //   body: message.body,
+      // })
+      let message_id = syncMessage(message, chat_id)
+      // console.log({ message_id })
+    } catch (error) {
+      console.error('[app] error syncing message', error)
+    }
   })
 
   console.log('[app] syncing messages...')

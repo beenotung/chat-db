@@ -55,8 +55,8 @@ export type MessageData = {
   body: string
   type: string
   t: number
-  from: { server: string; user: string; _serialized: string }
-  to: { server: string; user: string; _serialized: string }
+  from?: { server: string; user: string; _serialized: string }
+  to?: { server: string; user: string; _serialized: string }
   author?: { server: string; user: string; _serialized: string }
   ack: number
   invis: boolean
