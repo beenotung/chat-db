@@ -21,8 +21,8 @@ export type Chat = {
   is_group: boolean
   is_read_only: boolean
   unread_count: number
-  timestamp: number
-  archived: boolean
+  timestamp: null | number
+  archived: null | boolean
   pinned: boolean
   is_muted: boolean
   mute_expiration: number
@@ -44,7 +44,7 @@ export type Message = {
   to_user_id: number
   to_user?: User
   device_type: string
-  is_forwarded: boolean
+  is_forwarded: null | boolean
   forwarding_score: number
   is_status: boolean
   is_starred: boolean
@@ -69,10 +69,10 @@ export type Group = {
   owner_user?: User
   subject: string
   subject_time: number
-  desc: string
-  desc_id: string
-  desc_time: number
-  desc_owner_user_id: number
+  desc: null | string
+  desc_id: null | string
+  desc_time: null | number
+  desc_owner_user_id: null | number
   desc_owner_user?: User
   membership_approval_mode: boolean
   member_add_mode: string

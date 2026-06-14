@@ -30,8 +30,8 @@ name text
 is_group boolean
 is_read_only boolean
 unread_count integer
-timestamp integer
-archived boolean
+timestamp integer NULL
+archived boolean NULL
 pinned boolean
 is_muted boolean
 mute_expiration integer
@@ -51,7 +51,7 @@ timestamp integer
 from_user_id integer FK >0- user.id
 to_user_id integer FK >0- user.id
 device_type text
-is_forwarded boolean
+is_forwarded boolean NULL
 forwarding_score integer
 is_status boolean
 is_starred boolean
@@ -75,10 +75,10 @@ creation_time integer
 owner_user_id integer FK >0- user.id
 subject text
 subject_time integer
-desc text
-desc_id text
-desc_time integer
-desc_owner_user_id integer FK >0- user.id
+desc text NULL
+desc_id text NULL
+desc_time integer NULL
+desc_owner_user_id integer NULL FK >0- user.id
 membership_approval_mode boolean
 member_add_mode text
 suspended boolean
@@ -100,7 +100,7 @@ is_super_admin boolean
 
 
 # zoom: 1.000
-# view: (0, 0)
+# view: (-1, 1)
 # text-bg: #6495ed
 # text-color: #000000
 # diagram-bg: #f5f5f5

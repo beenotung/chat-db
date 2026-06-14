@@ -82,10 +82,12 @@ let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
         owner_user_id: getUserId(groupMetadata.owner),
         subject: groupMetadata.subject,
         subject_time: groupMetadata.subjectTime,
-        desc: groupMetadata.desc,
-        desc_id: groupMetadata.descId,
-        desc_time: groupMetadata.descTime,
-        desc_owner_user_id: getUserId(groupMetadata.descOwner),
+        desc: groupMetadata.desc || null,
+        desc_id: groupMetadata.descId || null,
+        desc_time: groupMetadata.descTime || null,
+        desc_owner_user_id: groupMetadata.descOwner
+          ? getUserId(groupMetadata.descOwner)
+          : null,
         membership_approval_mode: groupMetadata.membershipApprovalMode,
         member_add_mode: groupMetadata.memberAddMode,
         suspended: groupMetadata.suspended,
