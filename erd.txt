@@ -50,6 +50,7 @@ type text
 timestamp integer
 from_user_id integer FK >0- user.id
 to_user_id integer FK >0- user.id
+author_user_id integer NULL FK >0- user.id
 device_type text
 is_forwarded boolean NULL
 forwarding_score integer

@@ -139,6 +139,7 @@ let syncMessage = (
       timestamp: message.timestamp,
       from_user_id: getUserId(data.from),
       to_user_id: getUserId(data.to),
+      author_user_id: data.author ? getUserId(data.author) : null,
       device_type: message.deviceType,
       is_forwarded: message.isForwarded,
       forwarding_score: message.forwardingScore,

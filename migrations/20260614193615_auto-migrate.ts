@@ -40,6 +40,7 @@ export async function up(knex: Knex): Promise<void> {
       table.integer('timestamp').notNullable()
       table.integer('from_user_id').unsigned().notNullable().references('user.id')
       table.integer('to_user_id').unsigned().notNullable().references('user.id')
+      table.integer('author_user_id').unsigned().nullable().references('user.id')
       table.text('device_type').notNullable()
       table.boolean('is_forwarded').nullable()
       table.integer('forwarding_score').notNullable()

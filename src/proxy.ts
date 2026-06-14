@@ -43,6 +43,8 @@ export type Message = {
   from_user?: User
   to_user_id: number
   to_user?: User
+  author_user_id: null | number
+  author_user?: User
   device_type: string
   is_forwarded: null | boolean
   forwarding_score: number
@@ -117,6 +119,7 @@ export let proxy = proxySchema<DBProxy>({
       ['chat', { field: 'chat_id', table: 'chat' }],
       ['from_user', { field: 'from_user_id', table: 'user' }],
       ['to_user', { field: 'to_user_id', table: 'user' }],
+      ['author_user', { field: 'author_user_id', table: 'user' }],
     ],
     group: [
       /* foreign references */
