@@ -76,7 +76,7 @@ export async function up(knex: Knex): Promise<void> {
       table.boolean('terminated').notNullable()
       table.boolean('is_parent_group').notNullable()
       table.boolean('is_parent_group_closed').notNullable()
-      table.integer('parent_group_id').unsigned().notNullable().references('group.id')
+      table.integer('parent_group_id').unsigned().nullable().references('group.id')
       table.json('pending_participants').nullable()
       table.json('past_participants').nullable()
       table.timestamps(false, true)

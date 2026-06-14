@@ -80,7 +80,7 @@ export type Group = {
   terminated: boolean
   is_parent_group: boolean
   is_parent_group_closed: boolean
-  parent_group_id: number
+  parent_group_id: null | number
   parent_group?: Group
   pending_participants: null | string // json
   past_participants: null | string // json
