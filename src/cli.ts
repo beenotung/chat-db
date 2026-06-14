@@ -1,5 +1,6 @@
 import { env } from './env'
 import { getClient } from './adapter'
+import { sync } from './sync'
 
 async function main() {
   let adapter = getClient({
@@ -23,8 +24,12 @@ async function main() {
     console.log('[client] auth_failure', message)
   })
   await adapter.ready
+  console.log('[app] client identity:', adapter.getTel() || 'unknown')
+  console.log('[app] auth state:', adapter.getAuthState())
 
   console.log('[app] syncing messages...')
+  await sync(adapter.client)
+  console.log('[app] synced messages')
 }
 
 main().catch(error => {
