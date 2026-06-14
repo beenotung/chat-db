@@ -40,6 +40,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@beenotung/tslib": "^24.26.0",
     "better-sqlite3": "^12.6.2",
     "better-sqlite3-proxy": "^2.10.1",
     "better-sqlite3-schema": "^3.1.7",

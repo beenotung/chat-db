@@ -5,25 +5,29 @@ import { db } from './db'
 import { formatProgress } from './format'
 import { mkdirSync, writeFileSync } from 'fs'
 import { GroupMetadata, MessageData } from './types'
+import { ProgressCli } from '@beenotung/tslib/progress-cli'
 
 mkdirSync('res', { recursive: true })
 
 export async function sync(client: Client) {
+  let cli = new ProgressCli()
   let chats = await client.getChats()
   writeFileSync('res/chats.json', JSON.stringify(chats, null, 2))
   let pairs = []
   let chat_index = 0
   for (let chat of chats) {
     chat_index++
-    process.stdout.write(
-      '\r[sync] saving chats... ' + formatProgress(chat_index, chats.length),
+    cli.update(
+      '[sync] saving chats... ' + formatProgress(chat_index, chats.length),
     )
     let chat_row = syncChat(chat)
     pairs.push({ chat, chat_row })
   }
+  cli.nextLine()
   chat_index = 0
   for (let { chat, chat_row } of pairs) {
     chat_index++
+    await client.syncHistory(chat.id._serialized)
     let messages = await chat.fetchMessages({ limit: Infinity })
     writeFileSync(
       `res/messages_${chat.id._serialized}.json`,
@@ -32,13 +36,19 @@ export async function sync(client: Client) {
     let message_index = 0
     for (let message of messages) {
       message_index++
-      process.stdout.write(
-        `\r[sync] saving chat ${chat_index}/${chats.length} messages... ` +
+      cli.update(
+        `[sync] saving chat ${chat_index}/${chats.length} messages... ` +
           formatProgress(message_index, messages.length),
       )
       syncMessage(chat_row, message)
     }
+    if (messages.length === 0) {
+      cli.update(
+        `[sync] saving chat ${chat_index}/${chats.length} messages... (0/0)`,
+      )
+    }
   }
+  cli.nextLine()
 }
 
 function getUserId(args: { server: string; user: string }): number {
