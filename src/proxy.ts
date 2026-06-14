@@ -81,7 +81,7 @@ export type Group = {
   is_parent_group: boolean
   is_parent_group_closed: boolean
   parent_group_id: null | number
-  parent_group?: Group
+  parent_group?: User
   pending_participants: null | string // json
   past_participants: null | string // json
 }
@@ -123,7 +123,7 @@ export let proxy = proxySchema<DBProxy>({
       ['group_user', { field: 'group_user_id', table: 'user' }],
       ['owner_user', { field: 'owner_user_id', table: 'user' }],
       ['desc_owner_user', { field: 'desc_owner_user_id', table: 'user' }],
-      ['parent_group', { field: 'parent_group_id', table: 'group' }],
+      ['parent_group', { field: 'parent_group_id', table: 'user' }],
     ],
     group_participants: [
       /* foreign references */

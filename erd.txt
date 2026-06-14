@@ -85,7 +85,7 @@ suspended boolean
 terminated boolean
 is_parent_group boolean
 is_parent_group_closed boolean
-parent_group_id integer NULL FK >0- group.id
+parent_group_id integer NULL FK >0- user.id
 pending_participants json NULL
 past_participants json NULL
 
