@@ -1,0 +1,114 @@
+# Visualize on https://erd.surge.sh
+# or https://quick-erd.surge.sh
+#
+# Relationship Types
+#  -    - one to one
+#  -<   - one to many
+#  >-   - many to one
+#  >-<  - many to many
+#  -0   - one to zero or one
+#  0-   - zero or one to one
+#  0-0  - zero or one to zero or one
+#  -0<  - one to zero or many
+#  >0-  - zero or many to one
+#
+////////////////////////////////////
+
+
+user
+----
+id integer PK
+server text
+user text
+
+
+chat
+----
+id integer PK
+user_id integer FK >0- user.id
+name text
+is_group boolean
+is_read_only boolean
+unread_count integer
+timestamp integer
+archived boolean
+pinned boolean
+is_muted boolean
+mute_expiration integer
+last_message_id integer NULL
+
+
+message
+-------
+id integer PK
+chat_id integer FK >0- chat.id
+api_id text
+ack integer
+has_media boolean
+body text
+type text
+timestamp integer
+from_user_id integer FK >0- user.id
+to_user_id integer FK >0- user.id
+device_type text
+is_forwarded boolean
+forwarding_score integer
+is_status boolean
+is_starred boolean
+from_me boolean
+has_quoted_message boolean
+has_reaction boolean
+vcards json NULL
+mentioned_ids json NULL
+group_mentions json NULL
+is_gif boolean
+links json NULL
+poll_options json NULL
+poll_votes json NULL
+
+
+group
+-----
+id integer PK
+group_user_id integer FK >0- user.id
+creation_time integer
+owner_user_id integer FK >0- user.id
+subject text
+subject_time integer
+desc text
+desc_id text
+desc_time integer
+desc_owner_user_id integer FK >0- user.id
+membership_approval_mode boolean
+member_add_mode text
+suspended boolean
+terminated boolean
+is_parent_group boolean
+is_parent_group_closed boolean
+parent_group_id integer FK >0- group.id
+pending_participants json NULL
+past_participants json NULL
+
+
+group_participants
+------------------
+id integer PK
+group_id integer FK >0- group.id
+user_id integer FK >0- user.id
+is_admin boolean
+is_super_admin boolean
+
+
+# zoom: 1.000
+# view: (3, -2)
+# text-bg: #6495ed
+# text-color: #000000
+# diagram-bg: #f5f5f5
+# diagram-text: #000000
+# table-bg: #ffffff
+# table-text: #000000
+# user (515, 55)
+# chat (48, 130)
+# message (433, 295)
+# group (902, 44)
+# group_participants (900, 729)
