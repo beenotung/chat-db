@@ -9,4 +9,5 @@ dist/
 *.tgz
 .DS_Store
 Thumbs.db
-.session
+.wwebjs_auth
+.wwebjs_cache
