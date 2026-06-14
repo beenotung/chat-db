@@ -13,7 +13,7 @@ mkdirSync('res', { recursive: true })
 export async function sync(client: Client) {
   let cli = new ProgressCli()
   let chats = await client.getChats()
-  writeFileSync('res/chats.json', JSON.stringify(chats, null, 2))
+  // writeFileSync('res/chats.json', JSON.stringify(chats, null, 2))
   let pairs = []
   let chat_index = 0
   for (let chat of chats) {
@@ -53,10 +53,10 @@ export async function sync(client: Client) {
         )
       },
     })
-    writeFileSync(
-      `res/messages_${chat.id._serialized}.json`,
-      JSON.stringify(messages, null, 2),
-    )
+    // writeFileSync(
+    //   `res/messages_${chat.id._serialized}.json`,
+    //   JSON.stringify(messages, null, 2),
+    // )
     let message_index = 0
     for (let message of messages) {
       message_index++
