@@ -1,4 +1,5 @@
 import express from 'express'
+import { object, url, string, id, int, optional } from 'cast.ts'
 import { print } from 'listening-on'
 import { env } from './env'
 import { pick } from 'better-sqlite3-proxy'
@@ -90,13 +91,23 @@ where message.chat_id = :chat_id
   )
   .pluck()
 
+let get_messages_parser = object({
+  params: object({
+    id: id(),
+  }),
+  query: object({
+    limit: optional(int({ min: 1 })),
+    since: optional(id()),
+  }),
+})
 app.get('/chats/:id/messages', (req, res) => {
   try {
-    let chat_id = +req.params.id
+    let input = get_messages_parser.parse(req)
+    let chat_id = input.params.id
     let chat = proxy.chat[chat_id]
     let is_group = chat.is_group
-    let limit = +req.query.limit! || 20
-    let since = +req.query.since! || 0
+    let limit = input.query.limit || 20
+    let since = input.query.since || 0
     let messages = select_messages.all({ since, limit, chat_id })
     for (let message of messages) {
       let from_name = getName(message.from_user_id)
@@ -130,6 +141,24 @@ app.get('/chats/:id/messages', (req, res) => {
   }
 })
 
+export let hooks = {
+  new_message_url: '',
+}
+let register_hook_parser = object({
+  body: object({
+    url: url(),
+  }),
+})
+app.post('/hooks/new-message', (req, res) => {
+  try {
+    let input = register_hook_parser.parse(req)
+    hooks.new_message_url = input.body.url
+    res.json({ hooks })
+  } catch (error) {
+    res.json({ error: String(error) })
+  }
+})
+
 let port = env.PORT
 app.listen(port, error => {
   if (error) {
@@ -140,13 +169,24 @@ app.listen(port, error => {
 })
 
 export function attachClient(client: Client) {
+  let send_message_parser = object({
+    params: object({
+      id: id(),
+    }),
+    body: object({
+      content: string(),
+    }),
+  })
   app.post('/chats/:id/messages', async (req, res) => {
     try {
-      let chat_id = +req.params.id
-      let content = req.body.content
+      let input = send_message_parser.parse(req)
+      let chat_id = input.params.id
+      let content = input.body.content
+
       let chat = proxy.chat[chat_id]
       let { user, server } = chat.user!
       let chatId = `${user}@${server}`
+
       let message = await client.sendMessage(chatId, content, {})
       let message_id = syncMessage(message, chat_id)
       res.json({ message_id })
