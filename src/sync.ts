@@ -245,7 +245,7 @@ export function getChatId(message: WMessage): number {
 export let syncMessage = (
   message: WMessage & { _data?: MessageData },
   chat_id = getChatId(message),
-) => {
+): number => {
   let data = message._data!
   let message_id = seedRow(
     proxy.message,

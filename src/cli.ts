@@ -4,6 +4,7 @@ import { getClient } from './adapter'
 import { getChatId, sync, syncMessage } from './sync'
 import { proxy } from './proxy'
 import { writeFileSync } from 'fs'
+import { attachClient } from './server'
 
 async function main() {
   let adapter = getClient({
@@ -29,6 +30,8 @@ async function main() {
   await adapter.ready
   console.log('[app] client identity:', adapter.getTel() || 'unknown')
   console.log('[app] auth state:', adapter.getAuthState())
+
+  attachClient(adapter.client)
 
   adapter.client.on('message', message => {
     try {

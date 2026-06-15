@@ -5,6 +5,8 @@ import { pick } from 'better-sqlite3-proxy'
 import { proxy } from './proxy'
 import { db } from './db'
 import { getName, getTel } from './store'
+import { Client } from 'whatsapp-web.js'
+import { syncMessage } from './sync'
 
 let app = express()
 
@@ -136,3 +138,20 @@ app.listen(port, error => {
   }
   print(port)
 })
+
+export function attachClient(client: Client) {
+  app.post('/chats/:id/messages', async (req, res) => {
+    try {
+      let chat_id = +req.params.id
+      let content = req.body.content
+      let chat = proxy.chat[chat_id]
+      let { user, server } = chat.user!
+      let chatId = `${user}@${server}`
+      let message = await client.sendMessage(chatId, content, {})
+      let message_id = syncMessage(message, chat_id)
+      res.json({ message_id })
+    } catch (error) {
+      res.json({ error: String(error) })
+    }
+  })
+}
