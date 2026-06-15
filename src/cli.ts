@@ -1,3 +1,4 @@
+import './server'
 import { env } from './env'
 import { getClient } from './adapter'
 import { getChatId, sync, syncMessage } from './sync'
