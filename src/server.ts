@@ -12,6 +12,20 @@ app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
+function verifyApiKey(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) {
+  let api_key = req.header('X-API-KEY')
+  if (api_key !== env.API_KEY) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+  next()
+}
+app.use(verifyApiKey)
+
 let select_chats = db.prepare(/* sql */ `
 select
   chat.id
