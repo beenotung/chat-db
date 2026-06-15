@@ -258,8 +258,10 @@ export let syncMessage = (
       type: message.type,
       timestamp: message.timestamp,
       from_user_id: getUserId(parseUser(message.from)),
-      to_user_id: getUserId(parseUser(message.to)),
-      author_user_id: data.author ? getUserId(data.author) : null,
+      to_user_id: message.to ? getUserId(parseUser(message.to)) : null,
+      author_user_id: message.author
+        ? getUserId(parseUser(message.author))
+        : null,
       device_type: message.deviceType,
       is_forwarded: message.isForwarded,
       forwarding_score: message.forwardingScore,

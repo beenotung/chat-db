@@ -44,13 +44,13 @@ message
 id integer PK
 chat_id integer FK >0- chat.id
 api_id text unique
-ack integer
+ack integer NULL
 has_media boolean
 body text
 type text
 timestamp integer
 from_user_id integer FK >0- user.id
-to_user_id integer FK >0- user.id
+to_user_id integer NULL FK >0- user.id
 author_user_id integer NULL FK >0- user.id
 device_type text
 is_forwarded boolean NULL

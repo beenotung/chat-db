@@ -50,6 +50,19 @@ async function main() {
       let message_id = syncMessage(message, chat_id)
       // console.log({ message_id })
     } catch (error) {
+      let error_message = String(error)
+      if (error_message.includes('not found')) {
+        // message new from group
+        sync(adapter.client)
+          .then(() => {
+            let chat_id = getChatId(message)
+            syncMessage(message, chat_id)
+          })
+          .catch(error => {
+            console.error('[app] error syncing chat list', error)
+          })
+        return
+      }
       console.error('[app] error syncing message', error)
     }
   })

@@ -35,14 +35,14 @@ export type Message = {
   chat_id: number
   chat?: Chat
   api_id: string
-  ack: number
+  ack: null | number
   has_media: boolean
   body: string
   type: string
   timestamp: number
   from_user_id: number
   from_user?: User
-  to_user_id: number
+  to_user_id: null | number
   to_user?: User
   author_user_id: null | number
   author_user?: User
