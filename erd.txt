@@ -20,6 +20,7 @@ user
 id integer PK
 server text
 user text
+tel text NULL
 
 
 chat

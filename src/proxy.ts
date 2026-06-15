@@ -11,6 +11,7 @@ export type User = {
   id?: null | number
   server: string
   user: string
+  tel: null | string
 }
 
 export type Chat = {
