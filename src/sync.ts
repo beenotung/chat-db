@@ -1,5 +1,5 @@
 import { Client, Chat as WChat, Message as WMessage } from 'whatsapp-web.js'
-import { count, find, seedRow } from 'better-sqlite3-proxy'
+import { count, find, pick, seedRow, update } from 'better-sqlite3-proxy'
 import { Chat, proxy } from './proxy'
 import { db } from './db'
 import { formatProgress } from './format'
@@ -10,8 +10,20 @@ import { sleep } from '@beenotung/tslib/async/wait'
 
 mkdirSync('res', { recursive: true })
 
+let select_user_without_tel = db.prepare<
+  void[],
+  { id: number; server: string; user: string }
+>(/* sql */ `
+select id, server, user
+from user
+where tel is null
+  and user != '0'
+  and (server = 'lid' or server = 'c.us')
+`)
+
 export async function sync(client: Client) {
   let cli = new ProgressCli()
+
   let chats = await client.getChats()
   // writeFileSync('res/chats.json', JSON.stringify(chats, null, 2))
   let pairs = []
@@ -25,6 +37,7 @@ export async function sync(client: Client) {
     pairs.push({ chat, chat_row })
   }
   cli.nextLine()
+
   chat_index = 0
   for (let { chat, chat_row } of pairs) {
     chat_index++
@@ -71,6 +84,26 @@ export async function sync(client: Client) {
         `[sync] saving chat ${chat_index}/${chats.length} messages... (0/0)`,
       )
     }
+  }
+  cli.nextLine()
+
+  let users = select_user_without_tel.all()
+  let user_index = 0
+  for (let user of users) {
+    user_index++
+    cli.update(
+      `[sync] loading users... ${formatProgress(user_index, users.length)}`,
+    )
+    let tel = ''
+    let result = await client.getContactLidAndPhone([
+      user.user + '@' + user.server,
+    ])
+    let pn = result[0]?.pn
+    if (pn) {
+      tel = await client.getFormattedNumber(pn)
+    }
+    tel ||= ''
+    update(proxy.user, { id: user.id }, { tel })
   }
   cli.nextLine()
 }
