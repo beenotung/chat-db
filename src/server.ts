@@ -100,11 +100,11 @@ let get_messages_parser = object({
     since: optional(id()),
   }),
 })
-app.get('/chats/:id/messages', (req, res) => {
+app.get('/chats/whatsapp/:id/messages', (req, res) => {
   try {
     let input = get_messages_parser.parse(req)
     let chat_id = input.params.id
-    let chat = proxy.chat[chat_id]
+    let chat = proxy.ws_chat[chat_id]
     let is_group = chat.is_group
     let limit = input.query.limit || 20
     let since = input.query.since || 0
@@ -177,13 +177,13 @@ export function attachClient(client: Client) {
       content: string(),
     }),
   })
-  app.post('/chats/:id/messages', async (req, res) => {
+  app.post('/chats/whatsapp/:id/messages', async (req, res) => {
     try {
       let input = send_message_parser.parse(req)
       let chat_id = input.params.id
       let content = input.body.content
 
-      let chat = proxy.chat[chat_id]
+      let chat = proxy.ws_chat[chat_id]
       let { user, server } = chat.user!
       let chatId = `${user}@${server}`
 

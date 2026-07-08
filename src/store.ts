@@ -25,7 +25,7 @@ let tel_cache = new Map<number, string>()
 export function getTel(user_id: number) {
   let tel = tel_cache.get(user_id)
   if (tel === undefined) {
-    tel = proxy.user[user_id].tel || ''
+    tel = proxy.ws_user[user_id].tel || ''
     tel_cache.set(user_id, tel)
   }
   return tel
