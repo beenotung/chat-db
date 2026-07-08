@@ -1,12 +1,12 @@
 import { Client, Chat as WChat, Message as WMessage } from 'whatsapp-web.js'
 import { count, find, pick, seedRow, update } from 'better-sqlite3-proxy'
-import { WsChat, proxy } from './proxy'
-import { db } from './db'
-import { formatProgress } from './format'
-import { GroupMetadata, MessageData } from './types'
+import { WsChat, proxy } from '../../proxy'
+import { db } from '../../db'
+import { formatProgress } from '../../format'
+import { GroupMetadata, MessageData } from '../../types'
 import { ProgressCli } from '@beenotung/tslib/progress-cli'
 import { sleep } from '@beenotung/tslib/async/wait'
-import { makeSourceUtils } from './utils'
+import { makeSourceUtils } from '../../utils'
 
 let { writeFileSync } = makeSourceUtils({ source: 'whatsapp' })
 

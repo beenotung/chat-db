@@ -1,4 +1,4 @@
-import { getClient } from './adapter'
+import { getClient } from './source/whatsapp/adapter'
 import { env } from './env'
 
 async function main() {

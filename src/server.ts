@@ -7,7 +7,7 @@ import { proxy } from './proxy'
 import { db } from './db'
 import { getName, getTel } from './store'
 import { Client } from 'whatsapp-web.js'
-import { syncMessage } from './sync'
+import { syncMessage } from './source/whatsapp/sync'
 
 let app = express()
 
