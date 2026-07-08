@@ -3,12 +3,12 @@ import { count, find, pick, seedRow, update } from 'better-sqlite3-proxy'
 import { WsChat, proxy } from './proxy'
 import { db } from './db'
 import { formatProgress } from './format'
-import { mkdirSync, writeFileSync } from 'fs'
 import { GroupMetadata, MessageData } from './types'
 import { ProgressCli } from '@beenotung/tslib/progress-cli'
 import { sleep } from '@beenotung/tslib/async/wait'
+import { makeSourceUtils } from './utils'
 
-mkdirSync('res', { recursive: true })
+let { writeFileSync } = makeSourceUtils({ source: 'whatsapp' })
 
 let select_user_without_tel = db.prepare<
   void[],
@@ -25,7 +25,7 @@ export async function sync(client: Client) {
   let cli = new ProgressCli()
 
   let chats = await client.getChats()
-  // writeFileSync('res/chats.json', JSON.stringify(chats, null, 2))
+  // writeFileSync('chats.json', chats))
   let pairs = []
   let chat_index = 0
   for (let chat of chats) {
@@ -66,10 +66,7 @@ export async function sync(client: Client) {
         )
       },
     })
-    // writeFileSync(
-    //   `res/messages_${chat.id._serialized}.json`,
-    //   JSON.stringify(messages, null, 2),
-    // )
+    // writeFileSync(`messages_${chat.id._serialized}.json`, messages)
     let message_index = 0
     for (let message of messages) {
       message_index++
@@ -247,7 +244,7 @@ export let syncMessage = (
   chat_id = getChatId(message),
 ): number => {
   let data = message._data!
-  writeFileSync('res/message.json', JSON.stringify(message, null, 2))
+  // writeFileSync('message.json', message)
   let message_id = seedRow(
     proxy.ws_message,
     { api_id: message.id.id },
