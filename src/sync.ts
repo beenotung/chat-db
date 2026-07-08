@@ -1,6 +1,6 @@
 import { Client, Chat as WChat, Message as WMessage } from 'whatsapp-web.js'
 import { count, find, pick, seedRow, update } from 'better-sqlite3-proxy'
-import { Chat, proxy } from './proxy'
+import { WsChat, proxy } from './proxy'
 import { db } from './db'
 import { formatProgress } from './format'
 import { mkdirSync, writeFileSync } from 'fs'
@@ -59,7 +59,7 @@ export async function sync(client: Client) {
     )
     let messages = await fetchMessages({
       chat,
-      initial_limit: count(proxy.message, { chat_id }),
+      initial_limit: count(proxy.ws_message, { chat_id }),
       onProgress: count => {
         cli.update(
           `[sync] loading chat ${chat_index}/${chats.length} messages... [fetch messages] (${count} messages loaded)`,
@@ -103,7 +103,7 @@ export async function sync(client: Client) {
       tel = await client.getFormattedNumber(pn)
     }
     tel ||= ''
-    update(proxy.user, { id: user.id }, { tel })
+    update(proxy.ws_user, { id: user.id }, { tel })
   }
   cli.nextLine()
 }
@@ -159,7 +159,7 @@ function parseUser(remote: string) {
 }
 
 function getUserId(args: { server: string; user: string }): number {
-  return seedRow(proxy.user, {
+  return seedRow(proxy.ws_user, {
     server: args.server,
     user: args.user,
   })
@@ -167,8 +167,8 @@ function getUserId(args: { server: string; user: string }): number {
 
 export let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
   let user_id = getUserId(chat.id)
-  let chat_row = find(proxy.chat, { user_id })
-  let updates: Omit<Chat, 'id' | 'user_id' | 'last_message_id'> = {
+  let chat_row = find(proxy.ws_chat, { user_id })
+  let updates: Omit<WsChat, 'id' | 'user_id' | 'last_message_id'> = {
     name: chat.name,
     is_group: chat.isGroup,
     is_read_only: chat.isReadOnly,
@@ -180,19 +180,19 @@ export let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
     mute_expiration: chat.muteExpiration,
   }
   if (!chat_row) {
-    let id = proxy.chat.push({
+    let id = proxy.ws_chat.push({
       user_id,
       ...updates,
       last_message_id: null,
     })
-    chat_row = proxy.chat[id]
+    chat_row = proxy.ws_chat[id]
   } else {
     Object.assign(chat_row, updates)
   }
   let groupMetadata = chat.groupMetadata
   if (groupMetadata) {
     seedRow(
-      proxy.group,
+      proxy.ws_group,
       { group_user_id: user_id },
       {
         creation_time: groupMetadata.creation,
@@ -231,11 +231,11 @@ syncChat = db.transaction(syncChat)
 
 export function getChatId(message: WMessage): number {
   let [user, server] = message.id.remote.split('@')
-  let user_row = find(proxy.user, { server, user })
+  let user_row = find(proxy.ws_user, { server, user })
   if (!user_row) {
     throw new Error(`user ${message.id.remote} not found`)
   }
-  let chat_row = find(proxy.chat, { user_id: user_row.id! })
+  let chat_row = find(proxy.ws_chat, { user_id: user_row.id! })
   if (!chat_row) {
     throw new Error(`chat for user ${message.id.remote} not found`)
   }
@@ -247,8 +247,9 @@ export let syncMessage = (
   chat_id = getChatId(message),
 ): number => {
   let data = message._data!
+  writeFileSync('res/message.json', JSON.stringify(message, null, 2))
   let message_id = seedRow(
-    proxy.message,
+    proxy.ws_message,
     { api_id: message.id.id },
     {
       chat_id,

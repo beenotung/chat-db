@@ -7,17 +7,17 @@
 import { proxySchema } from 'better-sqlite3-proxy'
 import { db } from './db'
 
-export type User = {
+export type WsUser = {
   id?: null | number
   server: string
   user: string
   tel: null | string
 }
 
-export type Chat = {
+export type WsChat = {
   id?: null | number
   user_id: number
-  user?: User
+  user?: WsUser
   name: string
   is_group: boolean
   is_read_only: boolean
@@ -30,10 +30,10 @@ export type Chat = {
   last_message_id: null | number
 }
 
-export type Message = {
+export type WsMessage = {
   id?: null | number
   chat_id: number
-  chat?: Chat
+  chat?: WsChat
   api_id: string
   ack: null | number
   has_media: boolean
@@ -41,11 +41,11 @@ export type Message = {
   type: string
   timestamp: number
   from_user_id: number
-  from_user?: User
+  from_user?: WsUser
   to_user_id: null | number
-  to_user?: User
+  to_user?: WsUser
   author_user_id: null | number
-  author_user?: User
+  author_user?: WsUser
   device_type: string
   is_forwarded: null | boolean
   forwarding_score: number
@@ -63,20 +63,20 @@ export type Message = {
   poll_votes: null | string // json
 }
 
-export type Group = {
+export type WsGroup = {
   id?: null | number
   group_user_id: number
-  group_user?: User
+  group_user?: WsUser
   creation_time: number
   owner_user_id: number
-  owner_user?: User
+  owner_user?: WsUser
   subject: string
   subject_time: number
   desc: null | string
   desc_id: null | string
   desc_time: null | number
   desc_owner_user_id: null | number
-  desc_owner_user?: User
+  desc_owner_user?: WsUser
   membership_approval_mode: boolean
   member_add_mode: string
   suspended: boolean
@@ -84,55 +84,55 @@ export type Group = {
   is_parent_group: boolean
   is_parent_group_closed: boolean
   parent_group_id: null | number
-  parent_group?: User
+  parent_group?: WsUser
   pending_participants: null | string // json
   past_participants: null | string // json
 }
 
-export type GroupParticipants = {
+export type WsGroupParticipants = {
   id?: null | number
   group_id: number
-  group?: Group
+  group?: WsGroup
   user_id: number
-  user?: User
+  user?: WsUser
   is_admin: boolean
   is_super_admin: boolean
 }
 
 export type DBProxy = {
-  user: User[]
-  chat: Chat[]
-  message: Message[]
-  group: Group[]
-  group_participants: GroupParticipants[]
+  ws_user: WsUser[]
+  ws_chat: WsChat[]
+  ws_message: WsMessage[]
+  ws_group: WsGroup[]
+  ws_group_participants: WsGroupParticipants[]
 }
 
 export let proxy = proxySchema<DBProxy>({
   db,
   tableFields: {
-    user: [],
-    chat: [
+    ws_user: [],
+    ws_chat: [
       /* foreign references */
-      ['user', { field: 'user_id', table: 'user' }],
+      ['user', { field: 'user_id', table: 'ws_user' }],
     ],
-    message: [
+    ws_message: [
       /* foreign references */
-      ['chat', { field: 'chat_id', table: 'chat' }],
-      ['from_user', { field: 'from_user_id', table: 'user' }],
-      ['to_user', { field: 'to_user_id', table: 'user' }],
-      ['author_user', { field: 'author_user_id', table: 'user' }],
+      ['chat', { field: 'chat_id', table: 'ws_chat' }],
+      ['from_user', { field: 'from_user_id', table: 'ws_user' }],
+      ['to_user', { field: 'to_user_id', table: 'ws_user' }],
+      ['author_user', { field: 'author_user_id', table: 'ws_user' }],
     ],
-    group: [
+    ws_group: [
       /* foreign references */
-      ['group_user', { field: 'group_user_id', table: 'user' }],
-      ['owner_user', { field: 'owner_user_id', table: 'user' }],
-      ['desc_owner_user', { field: 'desc_owner_user_id', table: 'user' }],
-      ['parent_group', { field: 'parent_group_id', table: 'user' }],
+      ['group_user', { field: 'group_user_id', table: 'ws_user' }],
+      ['owner_user', { field: 'owner_user_id', table: 'ws_user' }],
+      ['desc_owner_user', { field: 'desc_owner_user_id', table: 'ws_user' }],
+      ['parent_group', { field: 'parent_group_id', table: 'ws_user' }],
     ],
-    group_participants: [
+    ws_group_participants: [
       /* foreign references */
-      ['group', { field: 'group_id', table: 'group' }],
-      ['user', { field: 'user_id', table: 'user' }],
+      ['group', { field: 'group_id', table: 'ws_group' }],
+      ['user', { field: 'user_id', table: 'ws_user' }],
     ],
   },
 })

@@ -15,7 +15,7 @@
 ////////////////////////////////////
 
 
-user
+ws_user
 ----
 id integer PK
 server text
@@ -23,10 +23,10 @@ user text
 tel text NULL
 
 
-chat
+ws_chat
 ----
 id integer PK
-user_id integer unique FK >0- user.id
+user_id integer unique FK >0- ws_user.id
 name text
 is_group boolean
 is_read_only boolean
@@ -39,19 +39,19 @@ mute_expiration integer
 last_message_id integer NULL
 
 
-message
+ws_message
 -------
 id integer PK
-chat_id integer FK >0- chat.id
+chat_id integer FK >0- ws_chat.id
 api_id text unique
 ack integer NULL
 has_media boolean
 body text
 type text
 timestamp integer
-from_user_id integer FK >0- user.id
-to_user_id integer NULL FK >0- user.id
-author_user_id integer NULL FK >0- user.id
+from_user_id integer FK >0- ws_user.id
+to_user_id integer NULL FK >0- ws_user.id
+author_user_id integer NULL FK >0- ws_user.id
 device_type text
 is_forwarded boolean NULL
 forwarding_score integer
@@ -69,34 +69,34 @@ poll_options json NULL
 poll_votes json NULL
 
 
-group
+ws_group
 -----
 id integer PK
-group_user_id integer unique FK >0- user.id
+group_user_id integer unique FK >0- ws_user.id
 creation_time integer
-owner_user_id integer FK >0- user.id
+owner_user_id integer FK >0- ws_user.id
 subject text
 subject_time integer
 desc text NULL
 desc_id text NULL
 desc_time integer NULL
-desc_owner_user_id integer NULL FK >0- user.id
+desc_owner_user_id integer NULL FK >0- ws_user.id
 membership_approval_mode boolean
 member_add_mode text
 suspended boolean
 terminated boolean
 is_parent_group boolean
 is_parent_group_closed boolean
-parent_group_id integer NULL FK >0- user.id
+parent_group_id integer NULL FK >0- ws_user.id
 pending_participants json NULL
 past_participants json NULL
 
 
-group_participants
+ws_group_participants
 ------------------
 id integer PK
-group_id integer FK >0- group.id
-user_id integer FK >0- user.id
+group_id integer FK >0- ws_group.id
+user_id integer FK >0- ws_user.id
 is_admin boolean
 is_super_admin boolean
 
@@ -109,8 +109,8 @@ is_super_admin boolean
 # diagram-text: #000000
 # table-bg: #ffffff
 # table-text: #000000
-# user (515, 55)
-# chat (25, 122)
-# message (433, 295)
-# group (902, 44)
-# group_participants (900, 729)
+# ws_chat (24, 122)
+# ws_message (433, 295)
+# ws_user (515, 55)
+# ws_group (902, 44)
+# ws_group_participants (900, 729)
