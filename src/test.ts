@@ -3,7 +3,7 @@ import { env } from './env'
 
 async function main() {
   let adapter = getClient({
-    session_dir: env.SESSION_DIR,
+    session_dir: env.WS_SESSION_DIR,
     headless: false,
     noSandbox: true,
   })

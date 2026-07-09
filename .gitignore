@@ -11,6 +11,7 @@ dist/
 Thumbs.db
 .wwebjs_auth
 .wwebjs_cache
+.telegram_auth
 .env.*
 !.env.example
 *.sqlite3
