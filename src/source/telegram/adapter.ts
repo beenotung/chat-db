@@ -1,7 +1,18 @@
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
+import { EventEmitter } from "events";
 import { saveSessionText } from "./auth";
 import qrcode from "qrcode-terminal";
+
+export type ClientEventMap = {
+  ready: []
+  qr: [qr: string]
+  disconnected: [reason: string]
+  authenticated: []
+  auth_failure: [message: string]
+}
+
+export type AuthState = 'loading' | 'authenticated' | 'not_authenticated'
 
 export type TelegramConfig = {
   session_dir: string;
@@ -16,6 +27,9 @@ export function getClient(options: TelegramConfig) {
   let client = new TelegramClient(session, options.apiId, options.apiHash, {
     connectionRetries: options.connectionRetries ?? 5,
   });
+
+  let events = new EventEmitter<ClientEventMap>()
+  let authState: AuthState = 'loading'
 
   let ready = new Promise<void>(async (resolve, reject) => {
     try {
@@ -34,17 +48,18 @@ export function getClient(options: TelegramConfig) {
           { apiId: options.apiId, apiHash: options.apiHash },
           {
             qrCode: async (code) => {
+              authState = 'not_authenticated'
               const encoded = code.token
                 .toString("base64")
                 .replace(/\+/g, "-")
                 .replace(/\//g, "_")
                 .replace(/=+$/, "");
               const url = `tg://login?token=${encoded}`;
+              events.emit('qr', url)
               qrcode.generate(url, { small: true });
             },
             onError: async (err) => {
               console.error(err);
-              // process.exit(1)
               return true;
             },
           },
@@ -57,7 +72,6 @@ export function getClient(options: TelegramConfig) {
         } else {
           console.log("login telegram successfully");
         }
-        // console.log("Session string:", client.session.save());
         let session_text = client.session.save();
         if (typeof session_text !== "string") {
           throw new Error("failed to get session text");
@@ -74,9 +88,14 @@ export function getClient(options: TelegramConfig) {
           console.log("login telegram successfully");
         }
       }
+      authState = 'authenticated'
+      events.emit('authenticated')
+      events.emit('ready')
+      resolve()
     } catch (error) {
+      authState = 'not_authenticated'
+      events.emit('auth_failure', String(error))
       reject(error);
-      return;
     }
   });
 
@@ -89,5 +108,9 @@ export function getClient(options: TelegramConfig) {
     return null;
   }
 
-  return { client, ready, getTel, events, getAuthState };
+  function getAuthState() {
+    return authState
+  }
+
+  return { client, ready, events, getTel, getAuthState };
 }
