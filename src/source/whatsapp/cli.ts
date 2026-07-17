@@ -2,6 +2,7 @@ import { env } from '../../env'
 import { attachClient } from '../../server'
 import { getClient } from './adapter'
 import { getChatId, sync, syncMessage } from './sync'
+import { log } from './utils'
 
 export async function main() {
   let adapter = getClient({
@@ -10,23 +11,23 @@ export async function main() {
     no_sandbox: true,
   })
   adapter.events.on('ready', () => {
-    console.log('[client] ready')
+    log.client('ready')
   })
   adapter.events.on('qr', qr => {
-    console.log('[client] qr', qr)
+    log.client('qr', qr)
   })
   adapter.events.on('disconnected', reason => {
-    console.log('[client] disconnected', reason)
+    log.client('disconnected', reason)
   })
   adapter.events.on('authenticated', () => {
-    console.log('[client] authenticated')
+    log.client('authenticated')
   })
   adapter.events.on('auth_failure', message => {
-    console.log('[client] auth_failure', message)
+    log.client('auth_failure', message)
   })
   await adapter.ready
-  console.log('[app] client identity:', adapter.getTel() || 'unknown')
-  console.log('[app] auth state:', adapter.getAuthState())
+  log.app('client identity:', adapter.getTel() || 'unknown')
+  log.app('auth state:', adapter.getAuthState())
 
   attachClient(adapter.client)
 
@@ -38,14 +39,14 @@ export async function main() {
       // )
       let chat_id = getChatId(message)
       // let chat = proxy.chat[chat_id]
-      // console.log('[app] new message:', {
+      // log.debug('new message:', {
       //   id: message.id.id,
       //   remote: message.id.remote,
       //   chat: { id: chat_id, name: chat.name },
       //   body: message.body,
       // })
       let message_id = syncMessage(message, chat_id)
-      // console.log({ message_id })
+      // log.debug({ message_id })
     } catch (error) {
       let error_message = String(error)
       if (error_message.includes('not found')) {
@@ -56,15 +57,15 @@ export async function main() {
             syncMessage(message, chat_id)
           })
           .catch(error => {
-            console.error('[app] error syncing chat list', error)
+            log.error('failed to sync chat list:', error)
           })
         return
       }
-      console.error('[app] error syncing message', error)
+      log.error('failed to sync message:', error)
     }
   })
 
-  console.log('[app] syncing messages...')
+  log.app('syncing messages...')
   await sync(adapter.client)
-  console.log('[app] synced messages')
+  log.app('synced messages')
 }

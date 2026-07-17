@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 export function makeSourceUtils(args: { source: string }) {
-  let dir = `res/${args.source}`
+  let source = args.source
+  let dir = `res/${source}`
   mkdirSync(dir, { recursive: true })
   return {
     dir,
@@ -12,6 +13,20 @@ export function makeSourceUtils(args: { source: string }) {
         data = JSON.stringify(data, null, 2)
       }
       writeFileSync(file, data)
+    },
+    log: {
+      client(...args: any[]) {
+        console.log(`[${source} client]`, ...args)
+      },
+      app(...args: any[]) {
+        console.log(`[${source} app]`, ...args)
+      },
+      error(...args: any[]) {
+        console.error(`[${source} error]`, ...args)
+      },
+      debug(...args: any[]) {
+        console.debug(`[${source} debug]`, ...args)
+      },
     },
   }
 }

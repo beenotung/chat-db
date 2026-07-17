@@ -1,3 +1,3 @@
 import { makeSourceUtils } from '../../utils'
 
-export let { writeFileSync } = makeSourceUtils({ source: 'whatsapp' })
+export let { writeFileSync, log } = makeSourceUtils({ source: 'whatsapp' })
