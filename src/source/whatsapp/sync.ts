@@ -15,7 +15,7 @@ let select_user_without_tel = db.prepare<
   { id: number; server: string; user: string }
 >(/* sql */ `
 select id, server, user
-from user
+from ws_user as user
 where tel is null
   and user != '0'
   and (server = 'lid' or server = 'c.us')

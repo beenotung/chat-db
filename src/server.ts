@@ -5,7 +5,7 @@ import { env } from './env'
 import { pick } from 'better-sqlite3-proxy'
 import { proxy } from './proxy'
 import { db } from './db'
-import { getName, getTel } from './store'
+import { getName, getTel } from './source/whatsapp/store'
 import { Client } from 'whatsapp-web.js'
 import { syncMessage } from './source/whatsapp/sync'
 
@@ -36,8 +36,8 @@ select
 , chat.is_group
 , chat.timestamp
 , user.tel
-from chat
-inner join user on user.id = chat.user_id
+from ws_chat as chat
+inner join ws_user as user on user.id = chat.user_id
 order by timestamp desc
 `)
 
@@ -74,7 +74,7 @@ select
 , message.timestamp
 , ifnull(message.author_user_id, message.from_user_id) as from_user_id
 , message.to_user_id
-from message
+from ws_message as message
 where message.chat_id = :chat_id
   and message.id > :since
 order by timestamp asc
@@ -85,7 +85,7 @@ let count_messages = db
   .prepare(
     /* sql */ `
 select count(*)
-from message
+from ws_message as message
 where message.chat_id = :chat_id
 `,
   )

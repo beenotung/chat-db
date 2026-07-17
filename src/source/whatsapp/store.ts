@@ -1,11 +1,11 @@
-import { db } from './db'
-import { proxy } from './proxy'
+import { db } from '../../db'
+import { proxy } from '../../proxy'
 
 let select_name = db
   .prepare<{ user_id: number }, string>(
     /* sql */ `
 select name
-from chat
+from ws_chat as chat
 where user_id = :user_id
 `,
   )
