@@ -1,7 +1,7 @@
 import { appendEnv, populateEnv } from 'populate-env'
 
 export let env = {
-  SESSION_DIR: '.wwebjs_auth',
+  WS_SESSION_DIR: '.wwebjs_auth',
   PORT: 3000,
   API_KEY: 'uuid',
 }
