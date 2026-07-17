@@ -1,0 +1,5 @@
+- [ ] implement events and getAuthState in telegram adapter
+- [ ] update the cli.ts in telegram folder, similar to whatsapp
+- [ ] define the tables in `erd.txt`
+- [ ] create the tables using `npm run db:plan`, and `npm run db:update`
+- [ ] implement the sync flow
