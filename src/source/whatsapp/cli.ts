@@ -7,7 +7,7 @@ export async function main() {
   let adapter = getClient({
     session_dir: env.WS_SESSION_DIR,
     headless: false,
-    noSandbox: true,
+    no_sandbox: true,
   })
   adapter.events.on('ready', () => {
     console.log('[client] ready')

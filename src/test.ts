@@ -5,7 +5,7 @@ async function main() {
   let adapter = getClient({
     session_dir: env.WS_SESSION_DIR,
     headless: false,
-    noSandbox: true,
+    no_sandbox: true,
   })
   await adapter.ready
   let client = adapter.client

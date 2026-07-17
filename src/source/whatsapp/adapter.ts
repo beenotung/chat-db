@@ -14,10 +14,10 @@ export type AuthState = 'loading' | 'authenticated' | 'not_authenticated'
 export function getClient(options: {
   session_dir: string
   headless: boolean
-  noSandbox: boolean
+  no_sandbox: boolean
 }) {
   let args: string[] = []
-  if (options.noSandbox) {
+  if (options.no_sandbox) {
     args.push('--no-sandbox')
     args.push('--disable-setuid-sandbox')
   }
