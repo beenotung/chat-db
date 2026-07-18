@@ -6,7 +6,7 @@ export type ClientEventMap = {
   qr: [qr: string]
   disconnected: [reason: string]
   authenticated: []
-  auth_failure: [message: string]
+  auth_failure: [message: unknown]
 }
 
 export type AuthState = 'loading' | 'authenticated' | 'not_authenticated'
