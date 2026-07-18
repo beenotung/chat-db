@@ -1,6 +1,16 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
+export type ClientEventMap = {
+  ready: []
+  qr: [qr: string]
+  disconnected: [reason: string]
+  authenticated: []
+  auth_failure: [message: string]
+}
+
+export type AuthState = 'loading' | 'authenticated' | 'not_authenticated'
+
 export function makeSourceUtils(args: { source: string }) {
   let source = args.source
   let dir = `res/${source}`

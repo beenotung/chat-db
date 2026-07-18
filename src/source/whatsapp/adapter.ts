@@ -1,15 +1,6 @@
 import { Client, LocalAuth } from 'whatsapp-web.js'
 import { EventEmitter } from 'events'
-
-export type ClientEventMap = {
-  ready: []
-  qr: [qr: string]
-  disconnected: [reason: string]
-  authenticated: []
-  auth_failure: [message: string]
-}
-
-export type AuthState = 'loading' | 'authenticated' | 'not_authenticated'
+import { ClientEventMap, AuthState } from '../../utils'
 
 export function getClient(options: {
   session_dir: string
