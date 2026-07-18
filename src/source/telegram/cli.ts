@@ -28,4 +28,10 @@ export async function main() {
   let tel = await adapter.getTel()
   log.app('client identity:', tel || 'unknown')
   log.app('auth state:', adapter.getAuthState())
+
+  let client = adapter.client
+
+  log.app('syncing messages...')
+  await sync(client)
+  log.app('synced messages')
 }

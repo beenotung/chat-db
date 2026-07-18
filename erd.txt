@@ -16,7 +16,7 @@
 
 
 ws_user
-----
+-------
 id integer PK
 server text
 user text
@@ -24,7 +24,7 @@ tel text NULL
 
 
 ws_chat
-----
+-------
 id integer PK
 user_id integer unique FK >0- ws_user.id
 name text
@@ -40,7 +40,7 @@ last_message_id integer NULL
 
 
 ws_message
--------
+----------
 id integer PK
 chat_id integer FK >0- ws_chat.id
 api_id text unique
@@ -70,7 +70,7 @@ poll_votes json NULL
 
 
 ws_group
------
+--------
 id integer PK
 group_user_id integer unique FK >0- ws_user.id
 creation_time integer
@@ -93,7 +93,7 @@ past_participants json NULL
 
 
 ws_group_participants
-------------------
+---------------------
 id integer PK
 group_id integer FK >0- ws_group.id
 user_id integer FK >0- ws_user.id
@@ -101,16 +101,94 @@ is_admin boolean
 is_super_admin boolean
 
 
+tg_dialog
+---------
+id integer PK
+api_id text unique
+name text NULL
+timestamp integer NULL
+unread_count integer
+unread_mentions_count integer
+folder_id integer NULL
+is_user boolean
+is_group boolean
+is_channel boolean
+pinned boolean
+archived boolean
+
+
+tg_user
+-------
+id integer PK
+dialog_id integer FK >0- tg_dialog.id
+api_id text unique
+username text NULL
+phone text NULL
+status text NULL
+first_name text NULL
+last_name text NULL
+lang_code text NULL
+usernames json NULL
+is_self boolean
+is_deleted boolean
+is_bot boolean NULL
+is_scam boolean NULL
+is_close_friend boolean
+restrictions json NULL
+
+
+tg_chat
+-------
+id integer PK
+dialog_id integer FK >0- tg_dialog.id
+api_id text unique
+title text
+is_creator boolean NULL
+is_left boolean NULL
+is_deactivated boolean NULL
+is_call_active boolean NULL
+is_call_not_empty boolean NULL
+is_no_forwards boolean NULL
+participants_count integer NULL
+timestamp integer NULL
+migrated_to_channel_id integer NULL
+
+
+tg_channel
+----------
+id integer PK
+dialog_id integer FK >0- tg_dialog.id
+api_id text unique
+title text
+username text NULL
+is_creator boolean NULL
+is_left boolean NULL
+is_broadcast boolean NULL
+is_restricted boolean NULL
+is_scam boolean NULL
+is_slow_mode boolean NULL
+is_no_forwards boolean NULL
+restrictions json NULL
+participants_count integer NULL
+usernames json NULL
+level integer NULL
+subscription_until_time integer NULL
+
+
 # zoom: 1.000
-# view: (-1, 1)
+# view: (-85, 362)
 # text-bg: #6495ed
 # text-color: #000000
 # diagram-bg: #f5f5f5
 # diagram-text: #000000
 # table-bg: #ffffff
 # table-text: #000000
+# ws_user (515, 55)
 # ws_chat (24, 122)
 # ws_message (433, 295)
-# ws_user (515, 55)
 # ws_group (902, 44)
 # ws_group_participants (900, 729)
+# tg_dialog (10, 1305)
+# tg_user (883, 1294)
+# tg_chat (460, 1169)
+# tg_channel (457, 1598)
