@@ -3,7 +3,13 @@ import QRCode from 'qrcode-terminal'
 import { EventEmitter } from 'events'
 import { StringSession } from 'teleproto/sessions'
 import { join } from 'path'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from 'fs'
 import { ClientEventMap, AuthState } from '../../utils'
 import { log } from './utils'
 
@@ -25,6 +31,11 @@ export function getClient(options: {
     save(session: string) {
       writeFileSync(this.file, session)
     },
+    clear() {
+      if (existsSync(this.file)) {
+        unlinkSync(this.file)
+      }
+    },
   }
   let session_string = sessionStorage.load()
   let session = new StringSession(session_string)
@@ -40,6 +51,17 @@ export function getClient(options: {
   let ready = new Promise<void>(async (resolve, reject) => {
     try {
       await client.connect()
+
+      if (session_string) {
+        try {
+          await client.getMe()
+        } catch (error) {
+          // login session expired
+          log.client('login session expired, need to login again')
+          session_string = ''
+          sessionStorage.clear()
+        }
+      }
 
       if (!session_string) {
         await client.signInUserWithQrCode(
@@ -71,7 +93,7 @@ export function getClient(options: {
         sessionStorage.save(session_string)
       }
 
-      if (!client.isUserAuthorized()) {
+      if (!(await client.isUserAuthorized())) {
         throw new Error('User not authorized')
       }
 
