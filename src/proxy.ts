@@ -40,6 +40,7 @@ export type WsMessage = {
   body: string
   type: string
   timestamp: number
+  edit_time: null | number
   from_user_id: number
   from_user?: WsUser
   to_user_id: null | number

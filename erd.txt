@@ -49,6 +49,7 @@ has_media boolean
 body text
 type text
 timestamp integer
+edit_time integer null
 from_user_id integer FK >0- ws_user.id
 to_user_id integer NULL FK >0- ws_user.id
 author_user_id integer NULL FK >0- ws_user.id

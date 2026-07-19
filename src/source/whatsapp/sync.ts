@@ -254,6 +254,7 @@ export let syncMessage = (args: {
       body: message.body,
       type: message.type,
       timestamp: message.timestamp,
+      edit_time: message.latestEditSenderTimestampMs || null,
       from_user_id: getUserId(parseUser(message.from)),
       to_user_id: message.to ? getUserId(parseUser(message.to)) : null,
       author_user_id: message.author
