@@ -188,7 +188,7 @@ export function attachClient(client: Client) {
       let chatId = `${user}@${server}`
 
       let message = await client.sendMessage(chatId, content, {})
-      let message_id = syncMessage(message, chat_id)
+      let message_id = syncMessage({ message, chat_id })
       res.json({ message_id })
     } catch (error) {
       res.json({ error: String(error) })

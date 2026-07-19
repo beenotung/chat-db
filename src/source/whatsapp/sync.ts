@@ -72,7 +72,7 @@ export async function sync(client: Client) {
         `[sync] saving chat ${chat_index}/${chats.length} messages... ` +
           formatProgress(message_index, messages.length),
       )
-      syncMessage(message, chat_id)
+      syncMessage({ message, chat_id })
     }
     if (messages.length === 0) {
       cli.update(
@@ -237,10 +237,11 @@ export function getChatId(message: WMessage): number {
   return chat_row.id!
 }
 
-export let syncMessage = (
-  message: WMessage & { _data?: MessageData },
-  chat_id = getChatId(message),
-): number => {
+export let syncMessage = (args: {
+  message: WMessage & { _data?: MessageData }
+  chat_id: number
+}): number => {
+  let { message, chat_id } = args
   let data = message._data!
   // writeFileSync('message.json', message)
   let message_id = seedRow(

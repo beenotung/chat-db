@@ -45,7 +45,7 @@ export async function main() {
       //   chat: { id: chat_id, name: chat.name },
       //   body: message.body,
       // })
-      let message_id = syncMessage(message, chat_id)
+      let message_id = syncMessage({ message, chat_id })
       // log.debug({ message_id })
     } catch (error) {
       let error_message = String(error)
@@ -54,7 +54,7 @@ export async function main() {
         sync(adapter.client)
           .then(() => {
             let chat_id = getChatId(message)
-            syncMessage(message, chat_id)
+            syncMessage({ message, chat_id })
           })
           .catch(error => {
             log.error('failed to sync chat list:', error)
