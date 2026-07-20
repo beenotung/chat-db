@@ -134,11 +134,11 @@ export type TgUser = {
   last_name: null | string
   lang_code: null | string
   usernames: null | string // json
-  is_self: boolean
-  is_deleted: boolean
+  is_self: null | boolean
+  is_deleted: null | boolean
   is_bot: null | boolean
   is_scam: null | boolean
-  is_close_friend: boolean
+  is_close_friend: null | boolean
   restrictions: null | string // json
 }
 

@@ -78,11 +78,11 @@ function getPeerId(entity: Api.User | Api.Chat | Api.Channel) {
         lang_code: user.langCode || null,
         usernames:
           user.usernames?.length! > 0 ? JSON.stringify(user.usernames) : null,
-        is_self: user.id === dialog.id,
-        is_deleted: false,
+        is_self: user.self ?? null,
+        is_deleted: user.deleted ?? null,
         is_bot: user.bot ?? null,
         is_scam: user.scam ?? null,
-        is_close_friend: false,
+        is_close_friend: user.closeFriend ?? null,
         restrictions:
           user.restrictionReason?.length! > 0
             ? JSON.stringify(user.restrictionReason)

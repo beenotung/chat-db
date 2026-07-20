@@ -135,11 +135,11 @@ first_name text NULL
 last_name text NULL
 lang_code text NULL
 usernames json NULL
-is_self boolean
-is_deleted boolean
+is_self boolean NULL
+is_deleted boolean NULL
 is_bot boolean NULL
 is_scam boolean NULL
-is_close_friend boolean
+is_close_friend boolean NULL
 restrictions json NULL
 
 
