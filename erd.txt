@@ -111,9 +111,9 @@ timestamp integer NULL
 unread_count integer
 unread_mentions_count integer
 folder_id integer NULL
-is_user boolean
-is_group boolean
-is_channel boolean
+user_id null FK >0- tg_user
+chat_id null FK >0- tg_chat
+channel_id null FK >0- tg_channel
 pinned boolean
 archived boolean
 
@@ -121,7 +121,6 @@ archived boolean
 tg_user
 -------
 id integer PK
-dialog_id integer FK >0- tg_dialog.id
 api_id text unique
 username text NULL
 phone text NULL
@@ -141,7 +140,6 @@ restrictions json NULL
 tg_chat
 -------
 id integer PK
-dialog_id integer FK >0- tg_dialog.id
 api_id text unique
 title text
 is_creator boolean NULL
@@ -158,7 +156,6 @@ migrated_to_channel_id integer NULL
 tg_channel
 ----------
 id integer PK
-dialog_id integer FK >0- tg_dialog.id
 api_id text unique
 title text
 username text NULL

@@ -1,6 +1,6 @@
 import { Api, TelegramClient } from 'teleproto'
 import { count, find, pick, seedRow, update } from 'better-sqlite3-proxy'
-import { WsChat, proxy } from '../../proxy'
+import { TgDialog, WsChat, proxy } from '../../proxy'
 import { db } from '../../db'
 import { formatProgress } from '../../format'
 import { GroupMetadata, MessageData } from '../../types'
@@ -36,8 +36,8 @@ export async function sync(client: TelegramClient) {
     cli.update(
       `[sync] saving dialogs... ${formatProgress(dialog_index, dialogs.length)}`,
     )
-    let dialog_row = syncDialog(dialog)
-    pairs.push({ dialog, dialog_row })
+    let { dialog_id } = syncDialog(dialog)
+    pairs.push({ dialog, dialog_id })
   }
   cli.nextLine()
 }
@@ -61,22 +61,32 @@ function getDialogType(dialog: Dialog) {
 }
 
 export let syncDialog = (dialog: Dialog) => {
-  let dialog_id = seedRow(
-    proxy.tg_dialog,
-    { api_id: dialog.id?.toString() },
-    {
-      name: dialog.name || null,
-      timestamp: dialog.date ? dialog.date * 1000 : null,
-      folder_id: dialog.folderId || null,
-      is_user: dialog.isUser,
-      is_group: dialog.isGroup,
-      is_channel: dialog.isChannel,
-      pinned: dialog.pinned,
-      archived: dialog.archived,
-      unread_count: dialog.unreadCount,
-      unread_mentions_count: dialog.unreadMentionsCount,
-    },
-  )
+  let dialog_row = find(proxy.tg_dialog, { api_id: dialog.id?.toString() })
+  let updates: Omit<
+    TgDialog,
+    'id' | 'api_id' | 'user_id' | 'chat_id' | 'channel_id'
+  > = {
+    name: dialog.name || null,
+    timestamp: dialog.date ? dialog.date * 1000 : null,
+    folder_id: dialog.folderId || null,
+    pinned: dialog.pinned,
+    archived: dialog.archived,
+    unread_count: dialog.unreadCount,
+    unread_mentions_count: dialog.unreadMentionsCount,
+  }
+  if (!dialog_row) {
+    let id = proxy.tg_dialog.push({
+      api_id: dialog.id?.toString() || '',
+      ...updates,
+      user_id: null,
+      chat_id: null,
+      channel_id: null,
+    })
+    dialog_row = proxy.tg_dialog[id]
+  } else {
+    Object.assign(dialog_row, updates)
+  }
+  let dialog_id = dialog_row.id!
 
   if (dialog.isUser) {
     let user = dialog.entity as Api.User
@@ -84,7 +94,6 @@ export let syncDialog = (dialog: Dialog) => {
       proxy.tg_user,
       { api_id: user.id.toString() },
       {
-        dialog_id,
         username: user.username || null,
         phone: user.phone || null,
         status: statusToText(user.status),
@@ -104,6 +113,9 @@ export let syncDialog = (dialog: Dialog) => {
             : null,
       },
     )
+    if (dialog_row.user_id !== user_id) {
+      dialog_row.user_id = user_id
+    }
   }
 
   if (dialog.isGroup) {
@@ -121,7 +133,6 @@ export let syncDialog = (dialog: Dialog) => {
       proxy.tg_chat,
       { api_id: chat.id.toString() },
       {
-        dialog_id,
         title: chat.title,
         is_creator: chat.creator ?? null,
         is_left: chat.left ?? null,
@@ -136,6 +147,9 @@ export let syncDialog = (dialog: Dialog) => {
         migrated_to_channel_id: channel_id ?? null,
       },
     )
+    if (dialog_row.chat_id !== chat_id) {
+      dialog_row.chat_id = chat_id
+    }
   }
 
   if (dialog.isChannel) {
@@ -144,7 +158,6 @@ export let syncDialog = (dialog: Dialog) => {
       proxy.tg_channel,
       { api_id: channel.id.toString() },
       {
-        dialog_id,
         title: channel.title,
         username: channel.username || null,
         is_creator: channel.creator ?? null,
@@ -169,7 +182,12 @@ export let syncDialog = (dialog: Dialog) => {
           : null,
       },
     )
+    if (dialog_row.channel_id !== channel_id) {
+      dialog_row.channel_id = channel_id
+    }
   }
+
+  return { dialog_id }
 }
 syncDialog = db.transaction(syncDialog)
 

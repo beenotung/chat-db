@@ -108,17 +108,18 @@ export type TgDialog = {
   unread_count: number
   unread_mentions_count: number
   folder_id: null | number
-  is_user: boolean
-  is_group: boolean
-  is_channel: boolean
+  user_id: null | number
+  user?: TgUser
+  chat_id: null | number
+  chat?: TgChat
+  channel_id: null | number
+  channel?: TgChannel
   pinned: boolean
   archived: boolean
 }
 
 export type TgUser = {
   id?: null | number
-  dialog_id: number
-  dialog?: TgDialog
   api_id: string
   username: null | string
   phone: null | string
@@ -137,8 +138,6 @@ export type TgUser = {
 
 export type TgChat = {
   id?: null | number
-  dialog_id: number
-  dialog?: TgDialog
   api_id: string
   title: string
   is_creator: null | boolean
@@ -154,8 +153,6 @@ export type TgChat = {
 
 export type TgChannel = {
   id?: null | number
-  dialog_id: number
-  dialog?: TgDialog
   api_id: string
   title: string
   username: null | string
@@ -212,18 +209,14 @@ export let proxy = proxySchema<DBProxy>({
       ['group', { field: 'group_id', table: 'ws_group' }],
       ['user', { field: 'user_id', table: 'ws_user' }],
     ],
-    tg_dialog: [],
-    tg_user: [
+    tg_dialog: [
       /* foreign references */
-      ['dialog', { field: 'dialog_id', table: 'tg_dialog' }],
+      ['user', { field: 'user_id', table: 'tg_user' }],
+      ['chat', { field: 'chat_id', table: 'tg_chat' }],
+      ['channel', { field: 'channel_id', table: 'tg_channel' }],
     ],
-    tg_chat: [
-      /* foreign references */
-      ['dialog', { field: 'dialog_id', table: 'tg_dialog' }],
-    ],
-    tg_channel: [
-      /* foreign references */
-      ['dialog', { field: 'dialog_id', table: 'tg_dialog' }],
-    ],
+    tg_user: [],
+    tg_chat: [],
+    tg_channel: [],
   },
 })
