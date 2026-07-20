@@ -126,9 +126,6 @@ export let syncDialog = (dialog: Dialog) => {
         : chat.migratedTo instanceof Api.InputChannelFromMessage
           ? chat.migratedTo.channelId
           : null
-    let channel_id = channelId
-      ? find(proxy.tg_channel, { api_id: channelId.toString() })?.id
-      : null
     let chat_id = seedRow(
       proxy.tg_chat,
       { api_id: chat.id.toString() },
@@ -144,7 +141,7 @@ export let syncDialog = (dialog: Dialog) => {
           ? chat.participantsCount
           : null,
         timestamp: chat.date * 1000,
-        migrated_to_channel_id: channel_id ?? null,
+        migrated_to_channel_api_id: channelId ? channelId.toString() : null,
       },
     )
     if (dialog_row.chat_id !== chat_id) {

@@ -148,7 +148,7 @@ export type TgChat = {
   is_no_forwards: null | boolean
   participants_count: null | number
   timestamp: null | number
-  migrated_to_channel_id: null | number
+  migrated_to_channel_api_id: null | string
 }
 
 export type TgChannel = {

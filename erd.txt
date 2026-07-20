@@ -150,7 +150,7 @@ is_call_not_empty boolean NULL
 is_no_forwards boolean NULL
 participants_count integer NULL
 timestamp integer NULL
-migrated_to_channel_id integer NULL
+migrated_to_channel_api_id text NULL
 
 
 tg_channel
