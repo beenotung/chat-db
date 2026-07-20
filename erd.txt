@@ -111,11 +111,17 @@ timestamp integer NULL
 unread_count integer
 unread_mentions_count integer
 folder_id integer NULL
-user_id null FK >0- tg_user
-chat_id null FK >0- tg_chat
-channel_id null FK >0- tg_channel
+peer_id integer FK 0- tg_peer.id
 pinned boolean
 archived boolean
+
+
+tg_peer
+-------
+id integer PK
+user_id integer NULL FK >0- tg_user.id
+chat_id integer NULL FK >0- tg_chat.id
+channel_id integer NULL FK >0- tg_channel.id
 
 
 tg_user

@@ -60,37 +60,13 @@ function getDialogType(dialog: Dialog) {
   return 'unknown'
 }
 
-export let syncDialog = (dialog: Dialog) => {
-  let dialog_row = find(proxy.tg_dialog, { api_id: dialog.id?.toString() })
-  let updates: Omit<
-    TgDialog,
-    'id' | 'api_id' | 'user_id' | 'chat_id' | 'channel_id'
-  > = {
-    name: dialog.name || null,
-    timestamp: dialog.date ? dialog.date * 1000 : null,
-    folder_id: dialog.folderId || null,
-    pinned: dialog.pinned,
-    archived: dialog.archived,
-    unread_count: dialog.unreadCount,
-    unread_mentions_count: dialog.unreadMentionsCount,
-  }
-  if (!dialog_row) {
-    let id = proxy.tg_dialog.push({
-      api_id: dialog.id?.toString() || '',
-      ...updates,
-      user_id: null,
-      chat_id: null,
-      channel_id: null,
-    })
-    dialog_row = proxy.tg_dialog[id]
-  } else {
-    Object.assign(dialog_row, updates)
-  }
-  let dialog_id = dialog_row.id!
-
-  if (dialog.isUser) {
-    let user = dialog.entity as Api.User
-    let user_id = seedRow(
+function getPeerId(entity: Api.User | Api.Chat | Api.Channel) {
+  let user_id = null
+  let chat_id = null
+  let channel_id = null
+  if (entity instanceof Api.User) {
+    let user = entity as Api.User
+    user_id = seedRow(
       proxy.tg_user,
       { api_id: user.id.toString() },
       {
@@ -113,20 +89,15 @@ export let syncDialog = (dialog: Dialog) => {
             : null,
       },
     )
-    if (dialog_row.user_id !== user_id) {
-      dialog_row.user_id = user_id
-    }
-  }
-
-  if (dialog.isGroup) {
-    let chat = dialog.entity as Api.Chat
+  } else if (entity instanceof Api.Chat) {
+    let chat = entity as Api.Chat
     let channelId =
       chat.migratedTo instanceof Api.InputChannel
         ? chat.migratedTo.channelId
         : chat.migratedTo instanceof Api.InputChannelFromMessage
           ? chat.migratedTo.channelId
           : null
-    let chat_id = seedRow(
+    chat_id = seedRow(
       proxy.tg_chat,
       { api_id: chat.id.toString() },
       {
@@ -144,14 +115,9 @@ export let syncDialog = (dialog: Dialog) => {
         migrated_to_channel_api_id: channelId ? channelId.toString() : null,
       },
     )
-    if (dialog_row.chat_id !== chat_id) {
-      dialog_row.chat_id = chat_id
-    }
-  }
-
-  if (dialog.isChannel) {
-    let channel = dialog.entity as Api.Channel
-    let channel_id = seedRow(
+  } else if (entity instanceof Api.Channel) {
+    let channel = entity as Api.Channel
+    channel_id = seedRow(
       proxy.tg_channel,
       { api_id: channel.id.toString() },
       {
@@ -179,10 +145,43 @@ export let syncDialog = (dialog: Dialog) => {
           : null,
       },
     )
-    if (dialog_row.channel_id !== channel_id) {
-      dialog_row.channel_id = channel_id
-    }
+  } else {
+    throw new Error('Unknown entity type')
   }
+  let peer_id = seedRow(proxy.tg_peer, {
+    user_id,
+    chat_id,
+    channel_id,
+  })
+  return { peer_id, user_id, chat_id, channel_id }
+}
+
+export let syncDialog = (dialog: Dialog) => {
+  let { peer_id } = getPeerId(
+    dialog.entity as Api.User | Api.Chat | Api.Channel,
+  )
+
+  let dialog_row = find(proxy.tg_dialog, { api_id: dialog.id?.toString() })
+  let updates: Omit<TgDialog, 'id' | 'api_id' | 'peer_id'> = {
+    name: dialog.name || null,
+    timestamp: dialog.date ? dialog.date * 1000 : null,
+    folder_id: dialog.folderId || null,
+    pinned: dialog.pinned,
+    archived: dialog.archived,
+    unread_count: dialog.unreadCount,
+    unread_mentions_count: dialog.unreadMentionsCount,
+  }
+  if (!dialog_row) {
+    let id = proxy.tg_dialog.push({
+      api_id: dialog.id?.toString() || '',
+      ...updates,
+      peer_id,
+    })
+    dialog_row = proxy.tg_dialog[id]
+  } else {
+    Object.assign(dialog_row, updates)
+  }
+  let dialog_id = dialog_row.id!
 
   return { dialog_id }
 }

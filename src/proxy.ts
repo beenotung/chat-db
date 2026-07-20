@@ -108,14 +108,20 @@ export type TgDialog = {
   unread_count: number
   unread_mentions_count: number
   folder_id: null | number
+  peer_id: number
+  peer?: TgPeer
+  pinned: boolean
+  archived: boolean
+}
+
+export type TgPeer = {
+  id?: null | number
   user_id: null | number
   user?: TgUser
   chat_id: null | number
   chat?: TgChat
   channel_id: null | number
   channel?: TgChannel
-  pinned: boolean
-  archived: boolean
 }
 
 export type TgUser = {
@@ -177,6 +183,7 @@ export type DBProxy = {
   ws_group: WsGroup[]
   ws_group_participants: WsGroupParticipants[]
   tg_dialog: TgDialog[]
+  tg_peer: TgPeer[]
   tg_user: TgUser[]
   tg_chat: TgChat[]
   tg_channel: TgChannel[]
@@ -210,6 +217,10 @@ export let proxy = proxySchema<DBProxy>({
       ['user', { field: 'user_id', table: 'ws_user' }],
     ],
     tg_dialog: [
+      /* foreign references */
+      ['peer', { field: 'peer_id', table: 'tg_peer' }],
+    ],
+    tg_peer: [
       /* foreign references */
       ['user', { field: 'user_id', table: 'tg_user' }],
       ['chat', { field: 'chat_id', table: 'tg_chat' }],
