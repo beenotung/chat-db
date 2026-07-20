@@ -7,6 +7,7 @@ import { GroupMetadata, MessageData } from '../../types'
 import { ProgressCli } from '@beenotung/tslib/progress-cli'
 import { sleep } from '@beenotung/tslib/async/wait'
 import { writeFileSync } from './utils'
+import { MINUTE } from '@beenotung/tslib/time'
 
 let select_user_without_tel = db.prepare<
   void[],
@@ -19,7 +20,18 @@ where tel is null
   and (server = 'lid' or server = 'c.us')
 `)
 
-export async function sync(client: Client) {
+let select_last_message_timestamp = db
+  .prepare<{ chat_id: number }, number>(
+    /* sql */ `
+select max(timestamp)
+from ws_message as message
+where chat_id = :chat_id
+`,
+  )
+  .pluck()
+
+export async function sync(args: { client: Client; full_sync: boolean }) {
+  let { client, full_sync } = args
   let cli = new ProgressCli()
 
   let chats = await client.getChats()
@@ -40,7 +52,12 @@ export async function sync(client: Client) {
   for (let { chat, chat_row } of pairs) {
     chat_index++
     let chat_id = chat_row.id!
-    cli.update(`[sync] loading chat ${chat_index}/${chats.length} messages... `)
+    cli.update(
+      `[sync] loading chat ${chat_index}/${chats.length} messages... [lookup last message timestamp]`,
+    )
+    let last_timestamp = full_sync
+      ? null
+      : select_last_message_timestamp.get({ chat_id }) || null
     cli.update(
       `[sync] loading chat ${chat_index}/${chats.length} messages... [open chat window]`,
     )
@@ -57,6 +74,7 @@ export async function sync(client: Client) {
     )
     let messages = await fetchMessages({
       chat,
+      last_timestamp,
       initial_limit: count(proxy.ws_message, { chat_id }),
       onProgress: count => {
         cli.update(
@@ -119,18 +137,29 @@ async function retry(fn: () => Promise<void>) {
   }
 }
 
+let edit_time_limit = 15 * MINUTE
+
 async function fetchMessages(args: {
   chat: WChat
+  last_timestamp: number | null
   onProgress: (count: number) => void
   initial_limit: number
 }) {
   let limit = args.initial_limit || 100
+  let last_timestamp = args.last_timestamp || null
   let prev_count = 0
   let interval = 500
   while (true) {
     await sleep(interval)
     let messages = await args.chat.fetchMessages({ limit })
     args.onProgress(messages.length)
+    if (last_timestamp && messages.length > 0) {
+      let earliest_message = messages[0]
+      if (earliest_message.timestamp < last_timestamp - edit_time_limit) {
+        // messages before this cutoff time are already synced, and won't be edited
+        return messages
+      }
+    }
     if (messages.length != prev_count) {
       prev_count = messages.length
       limit *= 2

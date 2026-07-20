@@ -1,6 +1,7 @@
 import { appendEnv, populateEnv } from 'populate-env'
 
 export let env = {
+  FULL_SYNC: true,
   WS_SESSION_DIR: '.wwebjs_auth',
   TG_SESSION_DIR: '.tg_auth',
   TG_API_ID: NaN,

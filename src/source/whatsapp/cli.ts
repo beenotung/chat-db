@@ -29,9 +29,10 @@ export async function main() {
   log.app('client identity:', adapter.getTel() || 'unknown')
   log.app('auth state:', adapter.getAuthState())
 
-  attachClient(adapter.client)
+  let client = adapter.client
+  attachClient(client)
 
-  adapter.client.on('message', message => {
+  client.on('message', message => {
     try {
       // writeFileSync(
       //   `res/new-message-${message.id.id}.json`,
@@ -50,8 +51,8 @@ export async function main() {
     } catch (error) {
       let error_message = String(error)
       if (error_message.includes('not found')) {
-        // message new from group
-        sync(adapter.client)
+        // message from newly added chat (group or private)
+        sync({ client, full_sync: false })
           .then(() => {
             let chat_id = getChatId(message)
             syncMessage({ message, chat_id })
@@ -66,6 +67,6 @@ export async function main() {
   })
 
   log.app('syncing messages...')
-  await sync(adapter.client)
+  await sync({ client, full_sync: env.FULL_SYNC })
   log.app('synced messages')
 }
