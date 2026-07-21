@@ -155,6 +155,7 @@ export type TgChat = {
   participants_count: null | number
   timestamp: null | number
   migrated_to_channel_api_id: null | string
+  is_forbidden: null | boolean
 }
 
 export type TgChannel = {
@@ -176,6 +177,88 @@ export type TgChannel = {
   subscription_until_time: null | number
 }
 
+export type TgMessage = {
+  id?: null | number
+  dialog_id: number
+  dialog?: TgDialog
+  api_id: string
+  from_peer_id: null | number
+  from_peer?: TgPeer
+  is_out: null | boolean
+  is_mentioned: null | boolean
+  is_media_unread: null | boolean
+  is_silent: null | boolean
+  is_post: null | boolean
+  is_from_scheduled: null | boolean
+  is_pinned: null | boolean
+  via_bot_api_id: null | string
+  timestamp: number
+  message: string
+  media: null | string // json
+  reply_markup: null | string // json
+  entities: null | string // json
+  view_count: null | number
+  forward_count: null | number
+  replies: null | string // json
+  edit_time: null | number
+  post_author: null | string
+  grouped_api_id: null | string
+  restriction_reason: null | string // json
+  ttl_period: null | number
+  reactions: null | string // json
+  is_no_forwards: null | boolean
+}
+
+export type TgMessageForward = {
+  id?: null | number
+  message_id: number
+  message?: TgMessage
+  source_message_id: null | number
+  source_message?: TgMessage
+  is_imported: null | boolean
+  is_saved_out: null | boolean
+  source_peer_id: null | number
+  source_peer?: TgPeer
+  source_name: null | string
+  source_timestamp: number
+  channel_post_api_id: null | string
+  post_author: null | string
+  saved_from_peer_id: null | number
+  saved_from_peer?: TgPeer
+  saved_from_msg_api_id: null | string
+  saved_forwarder_peer_id: null | number
+  saved_forwarder_peer?: TgPeer
+  saved_forwarder_name: null | string
+  saved_forwarder_timestamp: null | number
+  psa_type: null | string
+}
+
+export type TgMessageReply = {
+  id?: null | number
+  message_id: number
+  message?: TgMessage
+  is_reply_to_scheduled: null | boolean
+  is_forum_topic: null | boolean
+  is_quote: null | boolean
+  is_reply_to_ephemeral: null | boolean
+  reply_to_message_id: null | number
+  reply_to_message?: TgMessage
+  reply_to_msg_api_id: null | string
+  reply_to_peer_id: null | number
+  reply_to_peer?: TgPeer
+  reply_from_id: null | number
+  reply_from?: TgMessageForward
+  reply_media: null | string // json
+  reply_to_top_api_id: null | string
+  quote_text: null | string
+  quote_entities: null | string // json
+  quote_offset: null | number
+  todo_item_api_id: null | string
+  poll_option: null | Buffer
+  reply_message_id: null | number
+  reply_message?: TgMessage
+}
+
 export type DBProxy = {
   ws_user: WsUser[]
   ws_chat: WsChat[]
@@ -187,6 +270,9 @@ export type DBProxy = {
   tg_user: TgUser[]
   tg_chat: TgChat[]
   tg_channel: TgChannel[]
+  tg_message: TgMessage[]
+  tg_message_forward: TgMessageForward[]
+  tg_message_reply: TgMessageReply[]
 }
 
 export let proxy = proxySchema<DBProxy>({
@@ -229,5 +315,26 @@ export let proxy = proxySchema<DBProxy>({
     tg_user: [],
     tg_chat: [],
     tg_channel: [],
+    tg_message: [
+      /* foreign references */
+      ['dialog', { field: 'dialog_id', table: 'tg_dialog' }],
+      ['from_peer', { field: 'from_peer_id', table: 'tg_peer' }],
+    ],
+    tg_message_forward: [
+      /* foreign references */
+      ['message', { field: 'message_id', table: 'tg_message' }],
+      ['source_message', { field: 'source_message_id', table: 'tg_message' }],
+      ['source_peer', { field: 'source_peer_id', table: 'tg_peer' }],
+      ['saved_from_peer', { field: 'saved_from_peer_id', table: 'tg_peer' }],
+      ['saved_forwarder_peer', { field: 'saved_forwarder_peer_id', table: 'tg_peer' }],
+    ],
+    tg_message_reply: [
+      /* foreign references */
+      ['message', { field: 'message_id', table: 'tg_message' }],
+      ['reply_to_message', { field: 'reply_to_message_id', table: 'tg_message' }],
+      ['reply_to_peer', { field: 'reply_to_peer_id', table: 'tg_peer' }],
+      ['reply_from', { field: 'reply_from_id', table: 'tg_message_forward' }],
+      ['reply_message', { field: 'reply_message_id', table: 'tg_message' }],
+    ],
   },
 })
