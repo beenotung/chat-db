@@ -1,0 +1,4 @@
+onlyBuiltDependencies:
+  - better-sqlite3
+  - puppeteer
+  - whatsapp-web.js@https://codeload.github.com/MuhdSHiBiLi/whatsapp-web.js/tar.gz/f6da5d1d4d101417b14419e76ce4e3adae8a1090

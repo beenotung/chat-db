@@ -220,7 +220,7 @@ export let syncChat = (chat: WChat & { groupMetadata?: GroupMetadata }) => {
       { group_user_id: user_id },
       {
         creation_time: groupMetadata.creation,
-        owner_user_id: getUserId(groupMetadata.owner),
+        owner_user_id: groupMetadata.owner ? getUserId(groupMetadata.owner) : null,
         subject: groupMetadata.subject,
         subject_time: groupMetadata.subjectTime,
         desc: groupMetadata.desc || null,
