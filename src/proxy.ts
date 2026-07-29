@@ -259,6 +259,23 @@ export type TgMessageReply = {
   reply_message?: TgMessage
 }
 
+export type Plugin = {
+  id?: null | number
+  slug: string
+  webhook_url: null | string
+}
+
+export type PluginResult = {
+  id?: null | number
+  plugin_id: number
+  plugin?: Plugin
+  ws_message_id: null | number
+  ws_message?: WsMessage
+  tg_message_id: null | number
+  tg_message?: TgMessage
+  result: null | string // json
+}
+
 export type DBProxy = {
   ws_user: WsUser[]
   ws_chat: WsChat[]
@@ -273,6 +290,8 @@ export type DBProxy = {
   tg_message: TgMessage[]
   tg_message_forward: TgMessageForward[]
   tg_message_reply: TgMessageReply[]
+  plugin: Plugin[]
+  plugin_result: PluginResult[]
 }
 
 export let proxy = proxySchema<DBProxy>({
@@ -335,6 +354,13 @@ export let proxy = proxySchema<DBProxy>({
       ['reply_to_peer', { field: 'reply_to_peer_id', table: 'tg_peer' }],
       ['reply_from', { field: 'reply_from_id', table: 'tg_message_forward' }],
       ['reply_message', { field: 'reply_message_id', table: 'tg_message' }],
+    ],
+    plugin: [],
+    plugin_result: [
+      /* foreign references */
+      ['plugin', { field: 'plugin_id', table: 'plugin' }],
+      ['ws_message', { field: 'ws_message_id', table: 'ws_message' }],
+      ['tg_message', { field: 'tg_message_id', table: 'tg_message' }],
     ],
   },
 })
