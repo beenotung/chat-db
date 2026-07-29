@@ -56,13 +56,6 @@
     "populate-env": "^2.6.1",
     "puppeteer": "24.38.0",
     "teleproto": "^1.228.4",
-    "whatsapp-web.js": "github:lindionez/whatsapp-web.js#feat/fix-_serialized-id-fallback"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "puppeteer",
-      "better-sqlite3",
-      "whatsapp-web.js"
-    ]
+    "whatsapp-web.js": "github:MuhdSHiBiLi/whatsapp-web.js#main"
   }
 }

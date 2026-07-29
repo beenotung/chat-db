@@ -20,7 +20,7 @@ export type WsChat = {
   user?: WsUser
   name: string
   is_group: boolean
-  is_read_only: boolean
+  is_read_only: null | boolean
   unread_count: number
   timestamp: null | number
   archived: null | boolean
@@ -69,21 +69,21 @@ export type WsGroup = {
   group_user_id: number
   group_user?: WsUser
   creation_time: number
-  owner_user_id: number
+  owner_user_id: null | number
   owner_user?: WsUser
   subject: string
-  subject_time: number
+  subject_time: null | number
   desc: null | string
   desc_id: null | string
   desc_time: null | number
   desc_owner_user_id: null | number
   desc_owner_user?: WsUser
-  membership_approval_mode: boolean
-  member_add_mode: string
+  membership_approval_mode: null | boolean
+  member_add_mode: null | string
   suspended: boolean
   terminated: boolean
-  is_parent_group: boolean
-  is_parent_group_closed: boolean
+  is_parent_group: null | boolean
+  is_parent_group_closed: null | boolean
   parent_group_id: null | number
   parent_group?: WsUser
   pending_participants: null | string // json
